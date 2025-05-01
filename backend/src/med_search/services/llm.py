@@ -25,25 +25,41 @@ class GeminiClient:
 
         Pergunta: "{user_query}"
 
-        Retorne APENAS o objeto JSON puro, sem formatação markdown ou marcadores de código. O JSON deve ter a seguinte estrutura:
+        Retorne APENAS um objeto JSON com a seguinte estrutura, sem repetições ou texto adicional:
         {{
-            "clinical_concepts": ["lista de conceitos clínicos principais identificados na pergunta"],
-            "mesh_terms": ["lista de termos MeSH apropriados, com suas tags"],
-            "search_strategy": "estratégia de busca PubMed completa usando os termos MeSH e operadores booleanos"],
-            "english_translation": "tradução da pergunta para inglês (se a pergunta original não for em inglês)",
-            "start_year": ano inicial do período de busca (se houver),
-            "end_year": ano final do período de busca (se houver)
+            "clinical_concepts": ["lista única de conceitos clínicos principais"],
+            "mesh_terms": ["lista única de termos MeSH, sem duplicatas"],
+            "search_strategy": "estratégia de busca PubMed usando operadores booleanos (AND, OR) e parênteses para agrupamento",
+            "english_translation": "tradução para inglês (se a pergunta não for em inglês)",
+            "start_year": ano inicial (se mencionado na pergunta),
+            "end_year": ano final (se mencionado na pergunta)
         }}
 
-        - Se a pergunta mencionar um ano específico, defina start_year e end_year com o mesmo valor.
-        - Se a pergunta mencionar um intervalo de anos (ex: 2010-2020), defina start_year com o ano inicial e end_year com o ano final.
-        - Se a pergunta não mencionar nenhum período de tempo, omita os campos start_year e end_year.
+        Regras importantes:
+        1. Retorne apenas termos MeSH oficiais, conforme definidos pela NLM. Não crie ou invente termos MeSH que não existam na base oficial
+        2. Não repita conceitos ou termos MeSH
+        3. Agrupe termos relacionados com OR e diferentes conceitos com AND
+        4. Use parênteses para estruturar a busca adequadamente
+        5. Inclua filtros de data se houver período especificado
+        6. Se mencionados, inclua filtros de tipo de estudo (ex: [article_types])
+        7. Se a pergunta mencionar um ano específico, defina start_year e end_year com o mesmo valor
+        8. Se a pergunta mencionar um intervalo de anos (ex: 2010-2020), defina start_year com o ano inicial e end_year com o ano final
+        9. Se a pergunta não mencionar nenhum período de tempo, omita os campos start_year e end_year
 
-        Exemplo de formato esperado para termos MeSH:
-        "mesh_terms": ["Atrial Fibrillation[Mesh]", "Aged[Mesh]", "Renal Insufficiency[Mesh]", "Therapeutics[Mesh]"]
-
-        Exemplo de estratégia de busca:
-        "search_strategy": "(Atrial Fibrillation[Mesh]) AND (Aged[Mesh]) AND (Renal Insufficiency[Mesh]) AND (Therapeutics[Mesh])"
+        Exemplo de resposta bem estruturada:
+        {{
+            "clinical_concepts": ["Parkinson's Disease", "Elderly", "Drug Therapy"],
+            "mesh_terms": [
+                "Parkinson Disease[Mesh]",
+                "Aged[Mesh]",
+                "Drug Therapy[Mesh]",
+                "Randomized Controlled Trial[Publication Type]"
+            ],
+            "search_strategy": "((Parkinson Disease[Mesh]) AND (Aged[Mesh]) AND (Drug Therapy[Mesh])) AND (Randomized Controlled Trial[Publication Type])",
+            "start_year": 2020,
+            "end_year": 2024,
+            "english_translation": "Tradução da pergunta para inglês (se a pergunta original não for em inglês). Se a pergunta já vier em inglês retornar vazio."
+        }}
 
         IMPORTANTE: Retorne apenas o JSON, sem marcadores de código ou texto adicional.
         """
@@ -70,6 +86,12 @@ class GeminiClient:
                 # Converter para dict
                 result = json.loads(response_text)
 
+                # Remover duplicatas das listas
+                if "clinical_concepts" in result:
+                    result["clinical_concepts"] = list(dict.fromkeys(result["clinical_concepts"]))
+                if "mesh_terms" in result:
+                    result["mesh_terms"] = list(dict.fromkeys(result["mesh_terms"]))
+
                 # Validar se todas as chaves necessárias estão presentes
                 required_keys = ["clinical_concepts", "mesh_terms", "search_strategy"]
                 if not all(key in result for key in required_keys):
@@ -84,7 +106,7 @@ class GeminiClient:
                     raise ValueError("start_year deve ser um inteiro")
                 if end_year is not None and not isinstance(end_year, int):
                     raise ValueError("end_year deve ser um inteiro")
-
+                
                 return result
 
             except json.JSONDecodeError as e:
