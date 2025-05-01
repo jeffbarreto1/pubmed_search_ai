@@ -1,0 +1,33 @@
+[project]
+name = "med-search"
+version = "0.1.0"
+description = "Intelligent PubMed search using LLM"
+authors = [
+    {name = "Jefferson Barreto",email = "jeffersonlp@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn>=0.27.0",
+    "google-generativeai>=0.3.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+    "pydantic>=2.6.0",
+]
+
+[tool.poetry]
+packages = [{include = "med_search", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">=3.13"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+black = "^24.1.0"
+isort = "^5.13.0"
+flake8 = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
