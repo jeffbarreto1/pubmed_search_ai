@@ -37,11 +37,6 @@ def main():
             print(f"  De: {result['start_year']}")
             print(f"  Até: {result['end_year']}")
 
-        # Exibir tradução (se presente)
-        if result.get("english_translation"):
-            print("\nTradução para inglês:")
-            print(result["english_translation"])
-
     except Exception as e:
         print(f"\nErro: {str(e)}")
 
