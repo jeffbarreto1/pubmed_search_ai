@@ -20,48 +20,67 @@ class GeminiClient:
         Processa a pergunta médica e retorna uma estrutura com termos MeSH e estratégia de busca
         """
         prompt = f"""
-        Você é um especialista em pesquisa médica e estratégias de busca no PubMed.
-        Analise a seguinte pergunta clínica e forneça uma estratégia de busca otimizada:
+        Você é um especialista em pesquisa médica e estratégias de busca no PubMed, com foco em medicina baseada em evidências.
+
+        Analise a seguinte pergunta clínica e desenvolva uma estratégia de busca otimizada usando o método PICOTS e Building Block:
 
         Pergunta: "{user_query}"
 
-        Retorne APENAS um objeto JSON com a seguinte estrutura, sem repetições ou texto adicional:
+        Siga estas etapas:
+        1. Extraia os componentes PICOTS da pergunta:
+        - P (População): Quem são os pacientes ou população de interesse?
+        - I (Intervenção/Exposição): Qual é a intervenção, tratamento ou exposição principal?
+        - C (Comparação): Qual é a intervenção ou exposição de comparação? (se houver)
+        - O (Outcomes/Desfechos): Quais são os desfechos ou resultados de interesse?
+        - T (Tempo): Qual é o período de tempo relevante? (se especificado)
+        - S (Study Design/Desenho do estudo): Quais tipos de estudo são relevantes? (se especificado)
+
+        2. Para cada componente do PICOTS, crie um bloco de busca com:
+        - Termos MeSH oficiais da National Library of Medicine (NLM)
+        - Palavras-chave relevantes (sinônimos, variações)
+        - Combine os termos dentro de cada bloco com OR
+
+        3. Combine todos os blocos relevantes com AND para formar a estratégia final
+
+        Retorne APENAS um objeto JSON com a seguinte estrutura, sem formatação markdown ou texto adicional:
         {{
-            "clinical_concepts": ["lista única de conceitos clínicos principais"],
-            "mesh_terms": ["lista única de termos MeSH, sem duplicatas"],
-            "search_strategy": "estratégia de busca PubMed usando operadores booleanos (AND, OR) e parênteses para agrupamento",
-            "english_translation": "tradução para inglês (se a pergunta não for em inglês)",
-            "start_year": ano inicial (se mencionado na pergunta),
-            "end_year": ano final (se mencionado na pergunta)
+            "picots": {{
+                "population": "descrição da população",
+                "intervention": "descrição da intervenção",
+                "comparison": "descrição da comparação ou null",
+                "outcomes": "descrição dos desfechos",
+                "time": "período de tempo ou null",
+                "study_design": "desenho de estudo ou null"
+            }},
+            "search_blocks": {{
+                "population": "bloco de busca para população",
+                "intervention": "bloco de busca para intervenção",
+                "comparison": "bloco de busca para comparação ou null",
+                "outcomes": "bloco de busca para desfechos",
+                "time": "bloco de busca para tempo ou null",
+                "study_design": "bloco de busca para desenho de estudo ou null"
+            }},
+            "final_search_strategy": "estratégia de busca completa",
+            "mesh_terms": ["lista de termos MeSH"],
+            "start_year": 2020,
+            "end_year": 2025
         }}
 
         Regras importantes:
-        1. Retorne apenas termos MeSH oficiais, conforme definidos pela NLM. Não crie ou invente termos MeSH que não existam na base oficial
-        2. Não repita conceitos ou termos MeSH
-        3. Agrupe termos relacionados com OR e diferentes conceitos com AND
-        4. Use parênteses para estruturar a busca adequadamente
-        5. Inclua filtros de data se houver período especificado
-        6. Se mencionados, inclua filtros de tipo de estudo (ex: [article_types])
-        7. Se a pergunta mencionar um ano específico, defina start_year e end_year com o mesmo valor
-        8. Se a pergunta mencionar um intervalo de anos (ex: 2010-2020), defina start_year com o ano inicial e end_year com o ano final
-        9. Se a pergunta não mencionar nenhum período de tempo, omita os campos start_year e end_year
+        
+        1. Use APENAS termos MeSH oficiais da NLM. Não invente ou crie termos MeSH não oficiais.
+        2. Para cada componente, inclua tanto termos MeSH quanto palavras-chave relevantes.
+        3. Combine termos dentro de cada bloco com OR e use parênteses para agrupar.
+        4. Combine os blocos com AND na estratégia final.
+        5. Se algum componente do PICOTS não estiver presente na pergunta, defina como null.
+        6. Não repita termos MeSH na lista final.
+        7. Inclua filtros de data se houver período especificado.
+        8. Se a pergunta mencionar tipos específicos de estudo, inclua os filtros apropriados.
+        
+        EXEMPLO DE BLOCO DE BUSCA:
+        "population": "(\"Parkinson Disease\"[Mesh] OR parkinson OR parkinsonian) AND (\"Aged\"[Mesh] OR elderly OR older)"
 
-        Exemplo de resposta bem estruturada:
-        {{
-            "clinical_concepts": ["Parkinson's Disease", "Elderly", "Drug Therapy"],
-            "mesh_terms": [
-                "Parkinson Disease[Mesh]",
-                "Aged[Mesh]",
-                "Drug Therapy[Mesh]",
-                "Randomized Controlled Trial[Publication Type]"
-            ],
-            "search_strategy": "((Parkinson Disease[Mesh]) AND (Aged[Mesh]) AND (Drug Therapy[Mesh])) AND (Randomized Controlled Trial[Publication Type])",
-            "start_year": 2020,
-            "end_year": 2024,
-            "english_translation": "Tradução da pergunta para inglês (se a pergunta original não for em inglês). Se a pergunta já vier em inglês retornar vazio."
-        }}
-
-        IMPORTANTE: Retorne apenas o JSON, sem marcadores de código ou texto adicional.
+        IMPORTANTE: Retorne apenas o JSON, sem formatação markdown ou texto adicional.
         """
 
         try:
@@ -86,27 +105,15 @@ class GeminiClient:
                 # Converter para dict
                 result = json.loads(response_text)
 
-                # Remover duplicatas das listas
-                if "clinical_concepts" in result:
-                    result["clinical_concepts"] = list(dict.fromkeys(result["clinical_concepts"]))
-                if "mesh_terms" in result:
-                    result["mesh_terms"] = list(dict.fromkeys(result["mesh_terms"]))
-
-                # Validar se todas as chaves necessárias estão presentes
-                required_keys = ["clinical_concepts", "mesh_terms", "search_strategy"]
+                # Validar chaves necessárias
+                required_keys = ["picots", "search_blocks", "final_search_strategy", "mesh_terms"]
                 if not all(key in result for key in required_keys):
                     raise ValueError("Resposta incompleta do modelo")
                 
-                # Extrair start_year e end_year (se presentes)
-                start_year = result.get("start_year")
-                end_year = result.get("end_year")
+                # Remover duplicatas das listas
+                if "mesh_terms" in result:
+                    result["mesh_terms"] = list(dict.fromkeys(result["mesh_terms"]))   
 
-                # Validar se os anos são inteiros
-                if start_year is not None and not isinstance(start_year, int):
-                    raise ValueError("start_year deve ser um inteiro")
-                if end_year is not None and not isinstance(end_year, int):
-                    raise ValueError("end_year deve ser um inteiro")
-                
                 return result
 
             except json.JSONDecodeError as e:
