@@ -1,12 +1,17 @@
+import os
 import requests
 from typing import List, Dict, Optional
 from datetime import date
 from ..models.schemas import Article, Author, SearchRequest
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class PubMedClient:
     BASE_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 
     def __init__(self, api_key: Optional[str] = None):
+        api_key = os.getenv("PUBMED_API_KEY")
         self.api_key = api_key
 
     def _build_base_params(self) -> Dict:
