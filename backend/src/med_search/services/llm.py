@@ -123,9 +123,4 @@ class GeminiClient:
         except Exception as e:
             raise Exception(f"Erro ao processar query com Gemini: {str(e)}")
 
-    def improve_search_results(self, initial_results: str) -> str:
-        """
-        Opcional: Usar o Gemini para melhorar/filtrar os resultados
-        """
-        pass
     
