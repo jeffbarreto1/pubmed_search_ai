@@ -1,4 +1,6 @@
 from med_search.services.llm import GeminiClient
+from med_search.services.pubmed import PubMedClient
+from med_search.models.schemas import SearchRequest
 
 def main():
     gemini_client = GeminiClient()
@@ -36,6 +38,28 @@ def main():
             print("\nPeríodo de tempo:")
             print(f"  De: {result['start_year']}")
             print(f"  Até: {result['end_year']}")
+
+        # Cria a requisição de busca
+        request = SearchRequest(
+            query=result["final_search_strategy"],
+            max_results=5,
+            sort_by="relevance"
+        )
+
+        # Busqua os artigos
+        print("\nBuscando melhores artigos...\n")
+        client = PubMedClient(api_key=None)
+        articles = client.search_articles(request)
+
+        # Exibe os resultados
+        for article in articles:
+            print(f"Título: {article.title}")
+            print(f"Autores: {', '.join(a.name for a in article.authors)}")
+            print(f"Article Type: {', '.join(article.article_type)}")
+            print(f"Journal: {article.journal}")
+            print(f"DOI: {article.doi}")
+            print(f"Link: {article.url}")
+            print("---")
 
     except Exception as e:
         print(f"\nErro: {str(e)}")
