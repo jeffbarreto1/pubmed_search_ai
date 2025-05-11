@@ -1,26 +1,24 @@
-[project]
+[tool.poetry]
 name = "med-search"
 version = "0.1.0"
 description = "Intelligent PubMed search using LLM"
-authors = [
-    {name = "Jefferson Barreto",email = "jeffersonlp@gmail.com"}
-]
+authors = ["Jefferson Barreto <jeffersonlp@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "fastapi>=0.109.0",
-    "uvicorn>=0.27.0",
-    "google-generativeai>=0.3.0",
-    "python-dotenv>=1.0.0",
-    "requests>=2.31.0",
-    "pydantic>=2.6.0",
-]
-
-[tool.poetry]
 packages = [{include = "med_search", from = "src"}]
 
 [tool.poetry.dependencies]
-python = ">=3.13"
+python = ">=3.9,<4.0"
+fastapi = ">=0.109.0"
+uvicorn = ">=0.27.0"
+python-dotenv = ">=1.0.0"
+requests = ">=2.31.0"
+pydantic = ">=2.6.0"
+langgraph = "^0.4.3"
+langchain-core = "^0.3.59"
+langchain-google-genai = "^2.1.4"
+langchain-community = "^0.3.23"
+tavily-python = "^0.7.2"
+langgraph-cli = {extras = ["inmen"], version = "^0.2.10"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"

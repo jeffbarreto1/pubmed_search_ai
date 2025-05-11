@@ -62,3 +62,6 @@ coverage.xml
 
 # OS files
 Thumbs.db
+
+# LangGraph
+.langgraph_api/
