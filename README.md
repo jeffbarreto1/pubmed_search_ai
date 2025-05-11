@@ -28,12 +28,17 @@ Copy the example
 
 - GOOGLE_API_KEY=your_gemini_api_key_here
 - PUBMED_API_KEY=your_pubmed_api_key_here
+- TAVILY_API_KEY=your_tavily_api_key_here
 
 ### 4. Run a test query
 
 You can run the test script to interact with Gemini and see the PubMed search strategy:
 ```bash
-poetry run python tests/test_gemini.py
+langgraph dev
+```
+Or
+```bash
+langgraph dev --allow-blocking
 ```
 You will be prompted to enter a clinical question. The script will display:
 - Identified clinical concepts
@@ -49,3 +54,6 @@ You will be prompted to enter a clinical question. The script will display:
 - Google Generative AI (Gemini)
 - PubMed E-utilities API
 - python-dotenv
+- langgraph
+- langchain
+- tavily-python
