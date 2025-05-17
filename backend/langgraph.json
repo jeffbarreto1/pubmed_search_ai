@@ -1,0 +1,6 @@
+{
+    "dependencies": ["."],
+    "graphs": {
+        "agent": "src.med_search.agent.langgraph.agent:graph"
+    }
+}

@@ -2,7 +2,7 @@ from langgraph.prebuilt import create_react_agent
 from langchain_core.messages import SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from med_search.services.langgraph.tools import tools
+from med_search.agent.langgraph.tools import tools
 from dotenv import load_dotenv
 import os
 
