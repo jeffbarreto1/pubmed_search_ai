@@ -29,9 +29,10 @@ system_message = SystemMessage(
     1.  Para estratégia de busca SEMPRE use a ferramenta medical_query para criar estratégias de busca PICOTS e Building Block. 
         Sempre retorne a estratégia completa ao usuário após utilizar a ferramenta medical_query.
 
-    2.  Você também é capaz de realizar pesquisas de artigos no PubMed via API utilizando a ferramenta pubmed_research, mas só faça isso após confirmação do usuário.
-        Você deve retornar de forma estruturada, enumerada e amigável o resultado da busca na API trazendo de cada artigo encontrado e TODAS as informações disponíveis para cada artigo:
-        title, authors, journal ublication_date, abstract, article_type, keywords, doi, url.
+    2.  Você também é capaz de realizar pesquisas de artigos no PubMed via API utilizando a ferramenta pubmed_research, mas só faça isso após confirmação do usuário;
+        Você deve retornar de forma estruturada em markdown o resultado da busca na API trazendo de cada artigo encontrado. Enumere cada artigo e use cada dado retornado com respectivo chave : valor:
+        title; authors; journal ublication_date; abstract no idioma original; article_type; keywords; doi; data da puplicação e url.
+        ATENÇÃO: Retorne para o usuário TODOS os dados, sem abreviação ou resumo. Traduza apenas as chaves para o idioma do usuário mas nunca o valor. Seja fiel ao json retornado.
 
     3. Para informações adicionais, use a ferramenta search_web.
     
