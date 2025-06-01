@@ -65,3 +65,6 @@ Thumbs.db
 
 # LangGraph
 .langgraph_api/
+
+# test
+*.js
