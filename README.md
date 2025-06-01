@@ -30,9 +30,9 @@ Copy the example
 - PUBMED_API_KEY=your_pubmed_api_key_here
 - TAVILY_API_KEY=your_tavily_api_key_here
 
-### 4. Run a test query
+### 4. Run the agent in test mode
 
-You can run the test script to interact with Gemini and see the PubMed search strategy:
+You can run the agent in test mode to interact with Gemini and see how it works:
 ```bash
 langgraph dev
 ```
@@ -45,6 +45,13 @@ You will be prompted to enter a clinical question. The script will display:
 - MeSH terms
 - PubMed search strategy
 - (If present) Date range and English translation
+
+### 5. Run the agent in test mode
+
+You can run the API in test mode to interact with Gemini via Postman or other:
+```bash
+poetry run python run_api.py
+```
 
 ## Technologies Used
 

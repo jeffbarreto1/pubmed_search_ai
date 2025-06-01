@@ -20,6 +20,7 @@ langchain-community = "^0.3.23"
 tavily-python = "^0.7.2"
 langgraph-cli = {extras = ["inmen"], version = "^0.2.10"}
 
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
 black = "^24.1.0"
